@@ -229,14 +229,50 @@ order by sum(asg.creditos) desc ;
 
 Devuelve un listado que muestre cuántos alumnos se han matriculado de alguna asignatura en cada uno de los cursos escolares. El resultado deberá mostrar dos columnas, una columna con el año de inicio del curso escolar y otra con el número de alumnos matriculados.
 
+```sql
+select ce.anyo_inicio as 'año de inicio' ,count(p.id) as 'cantidad de alumnos'  from persona p
+join alumno_se_matricula_asignatura asma on p.id = asma.id_alumno 
+join curso_escolar ce on asma.id_curso_escolar = ce.id
+group by  ce.anyo_inicio order by count(p.id) desc;
+```
 Devuelve un listado con el número de asignaturas que imparte cada profesor. El listado debe tener en cuenta aquellos profesores que no imparten ninguna asignatura. El resultado mostrará cinco columnas: id, nombre, primer apellido, segundo apellido y número de asignaturas. El resultado estará ordenado de mayor a menor por el número de asignaturas.
+
+```sql
+select 
+pr.id  as 'id profesor' ,
+pr.nombre as 'nombre profesor',
+pr.apellido1 as 'primer apellido' ,
+pr.apellido2 as 'segundo apellido' ,
+if(count(asg.id)<> 0,count(asg.id),'no tiene ninguna asignatura asignada')as 'numero de asignaturas'
+from profesor p
+join persona pr on p.id_profesor = pr.id
+left join asignatura asg on p.id_profesor =asg.id_profesor 
+group by pr.id order by count(asg.id) desc;
+```
 
 1.5.8 Subconsultas
 Devuelve todos los datos del alumno más joven.
-
+```sql
+SELECT * 
+FROM persona
+WHERE tipo = 'alumno' 
+AND YEAR(fecha_nacimiento) = (
+    SELECT MAX(YEAR(fecha_nacimiento)) 
+    FROM persona 
+    WHERE tipo = 'alumno'
+);
+```
 Devuelve un listado con los profesores que no están asociados a un departamento.
+```sql
+select * from persona where  (tipo = 'profesor'  and id not in (select id_profesor from profesor )) or id in (select id_profesor from profesor where id_departamento is null);  
+
+```
+
 
 Devuelve un listado con los departamentos que no tienen profesores asociados.
+```sql
+select * from departamento where id not in (select id_departamento from profesor);
+```
 
 Devuelve un listado con los profesores que tienen un departamento asociado y que no imparten ninguna asignatura.
 
